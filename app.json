@@ -12,9 +12,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "android": {
-      "assetBundlePatterns": ["**/*"],
+      "assetBundlePatterns": [
+        "**/*"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
@@ -23,7 +28,8 @@
       "package": "com.muhammadsufian59.SecurityApp"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.muhammadsufian59.SecurityApp"
     },
     "web": {
       "favicon": "./assets/logo.png"
@@ -33,6 +39,8 @@
         "projectId": "6bead48f-cfa2-421a-9b6f-7825dd8692f4"
       }
     },
-    "plugins": ["expo-video"]
+    "plugins": [
+      "expo-video"
+    ]
   }
 }

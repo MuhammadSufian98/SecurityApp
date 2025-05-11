@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Header from "./components/header";
 import MainBody from "./components/mainBody";
-import liveFeed from "./components/liveFeed";
+import LiveFeed from "./components/liveFeed";
 
 const Stack = createNativeStackNavigator();
 
@@ -16,7 +16,7 @@ export default function App() {
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="Main" component={MainBody} />
-        <Stack.Screen name="liveFeed" component={liveFeed} />
+        <Stack.Screen name="liveFeed" component={LiveFeed} />
       </Stack.Navigator>
     </NavigationContainer>
   );

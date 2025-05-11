@@ -1,21 +1,27 @@
 import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { Video } from "expo-av";
 
-export default function liveFeed() {
+export default function LiveFeed() {
   const video = useRef(null);
-  const [selectedCam, setSelectedCam] = useState("Front Porch");
-
-  const handleCameraChange = (cam) => {
-    setSelectedCam(cam);
-  };
+  const cameraFeeds = [
+    {
+      name: "Front Porch",
+      uri: "https://www.w3schools.com/html/mov_bbb.mp4",
+    },
+    {
+      name: "Backyard",
+      uri: "https://www.w3schools.com/html/movie.mp4",
+    },
+    {
+      name: "Garage",
+      uri: "https://www.w3schools.com/html/mov_bbb.mp4",
+    },
+    {
+      name: "Driveway",
+      uri: "https://www.w3schools.com/html/movie.mp4",
+    },
+  ];
 
   return (
     <ScrollView style={{ marginBottom: 50 }}>
@@ -23,16 +29,14 @@ export default function liveFeed() {
         <Text style={styles.title}>Live Camera Viewer</Text>
 
         <View style={styles.videoColumn}>
-          {["Front Porch", "Backyard", "Garage", "Nothin"].map((cam) => (
-            <View key={cam} style={styles.videoContainer}>
-              <Text style={styles.cameraTitle}>{cam}</Text>
+          {cameraFeeds.map((cam) => (
+            <View key={cam.name} style={styles.videoContainer}>
+              <Text style={styles.cameraTitle}>{cam.name}</Text>
               <View style={styles.videoPlaceholder}>
                 <Video
                   ref={video}
                   style={styles.video}
-                  source={{
-                    uri: "https://www.w3schools.com/html/mov_bbb.mp4",
-                  }}
+                  source={{ uri: cam.uri }}
                   useNativeControls
                   resizeMode="contain"
                   isLooping
@@ -63,7 +67,7 @@ const styles = StyleSheet.create({
   },
   videoColumn: {
     width: "100%",
-    paddingHorizontal: 10,
+    borderRadius: 10,
   },
   videoContainer: {
     marginBottom: 20,
