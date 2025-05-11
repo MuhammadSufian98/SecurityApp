@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,10 @@ import {
   Dimensions,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
+import { Video } from "expo-av";
 
 export default function LiveFeed() {
+  const video = useRef(null);
   const route = useRoute();
   const { cameraTitle } = route.params || {};
   const [selectedCam, setSelectedCam] = useState(cameraTitle || "Front Porch");
@@ -22,7 +24,16 @@ export default function LiveFeed() {
       <Text style={styles.title}>Live Camera Viewer</Text>
 
       <View style={styles.videoPlaceholder}>
-        <Text style={styles.videoText}>[ {selectedCam} Feed Placeholder ]</Text>
+        <Video
+          ref={video}
+          style={styles.videoPlaceholder}
+          source={{
+            uri: "https://www.w3schools.com/html/mov_bbb.mp4",
+          }}
+          useNativeControls
+          resizeMode="contain"
+          isLooping
+        />
       </View>
 
       <View style={styles.buttonRow}>
