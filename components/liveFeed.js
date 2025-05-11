@@ -5,59 +5,44 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
 import { Video } from "expo-av";
 
-export default function LiveFeed() {
+export default function liveFeed() {
   const video = useRef(null);
-  const route = useRoute();
-  const { cameraTitle } = route.params || {};
-  const [selectedCam, setSelectedCam] = useState(cameraTitle || "Front Porch");
+  const [selectedCam, setSelectedCam] = useState("Front Porch");
 
   const handleCameraChange = (cam) => {
     setSelectedCam(cam);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Live Camera Viewer</Text>
+    <ScrollView style={{ marginBottom: 50 }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Live Camera Viewer</Text>
 
-      <View style={styles.videoPlaceholder}>
-        <Video
-          ref={video}
-          style={styles.videoPlaceholder}
-          source={{
-            uri: "https://www.w3schools.com/html/mov_bbb.mp4",
-          }}
-          useNativeControls
-          resizeMode="contain"
-          isLooping
-        />
+        <View style={styles.videoColumn}>
+          {["Front Porch", "Backyard", "Garage", "Nothin"].map((cam) => (
+            <View key={cam} style={styles.videoContainer}>
+              <Text style={styles.cameraTitle}>{cam}</Text>
+              <View style={styles.videoPlaceholder}>
+                <Video
+                  ref={video}
+                  style={styles.video}
+                  source={{
+                    uri: "https://www.w3schools.com/html/mov_bbb.mp4",
+                  }}
+                  useNativeControls
+                  resizeMode="contain"
+                  isLooping
+                />
+              </View>
+            </View>
+          ))}
+        </View>
       </View>
-
-      <View style={styles.buttonRow}>
-        {["Front Porch", "Backyard", "Garage"].map((cam) => (
-          <TouchableOpacity
-            key={cam}
-            style={[
-              styles.button,
-              selectedCam === cam && styles.selectedButton,
-            ]}
-            onPress={() => handleCameraChange(cam)}
-          >
-            <Text
-              style={[
-                styles.buttonText,
-                selectedCam === cam && styles.selectedText,
-              ]}
-            >
-              {cam}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -68,6 +53,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     backgroundColor: "#F5F5F5",
     alignItems: "center",
+    marginTop: 50,
   },
   title: {
     fontSize: 24,
@@ -75,39 +61,31 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#1F2937",
   },
+  videoColumn: {
+    width: "100%",
+    paddingHorizontal: 10,
+  },
+  videoContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  cameraTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10,
+    color: "#4B5563",
+  },
   videoPlaceholder: {
     width: "100%",
-    height: Dimensions.get("window").height * 0.3,
+    height: Dimensions.get("window").height * 0.2,
     backgroundColor: "#D1D5DB",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 30,
   },
-  videoText: {
-    fontSize: 16,
-    color: "#4B5563",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+  video: {
     width: "100%",
-  },
-  button: {
-    backgroundColor: "#E5E7EB",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    height: "100%",
     borderRadius: 10,
-  },
-  selectedButton: {
-    backgroundColor: "#4338CA",
-  },
-  buttonText: {
-    fontSize: 16,
-    color: "#1F2937",
-    fontWeight: "600",
-  },
-  selectedText: {
-    color: "#ffffff",
   },
 });
