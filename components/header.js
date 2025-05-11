@@ -28,7 +28,7 @@ export default function Header() {
 
         <View style={styles.headerCenter}>
           <Image
-            source={require("../assets/logo.jpg")}
+            source={require("../assets/logo.png")}
             style={styles.headerLogo}
           />
           <Text style={styles.headerText}>Smart Home Control</Text>
