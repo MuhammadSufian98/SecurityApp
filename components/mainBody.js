@@ -1,134 +1,153 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
+  TouchableOpacity,
   ScrollView,
   Dimensions,
-  TouchableOpacity,
+  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { WebView } from "react-native-webview";
+import axios from "axios";
 
 export default function MainBody() {
+  const video = useRef(null);
+  const [showLive, setShowLive] = useState(false);
+  const [sensorCount, setSensorCount] = useState(0); // Track sensor triggers
+  const [logs, setLogs] = useState([]); // Store the sensor logs
+
+  const cameraFeeds = [
+    {
+      name: "Front Porch",
+      uri: "http://192.168.10.120",
+    },
+  ];
+  const [currentCamera, setCurrentCamera] = useState(cameraFeeds[0]);
+
   const screenWidth = Dimensions.get("window").width;
   const isSmallScreen = screenWidth <= 650;
-  const navigation = useNavigation();
 
-  const renderAlarm = (title, subtitle, imageSrc, key) => (
-    <View
-      style={[styles.gridItem, { width: isSmallScreen ? "100%" : "48%" }]}
-      key={key}
-    >
-      <Image source={imageSrc} style={styles.image} />
-      <Text style={styles.headingImage}>{title}</Text>
-      <Text style={styles.subHeadingImage}>{subtitle}</Text>
-      <View style={{ flexDirection: "row", gap: 40 }}>
-        <TouchableOpacity>
-          <Image
-            source={require("../assets/bell-green.png")}
-            style={styles.TempImage}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image
-            source={require("../assets/disabled.png")}
-            style={styles.TempImage}
-          />
-        </TouchableOpacity>
+  // Fetch sensor logs from the backend
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const response = await axios.get(
+          "https://security-app-backend.vercel.app/sensorLog"
+        );
+        setLogs(response.data);
+        setSensorCount(response.data.length); // Update sensor count
+      } catch (error) {
+        console.error("Error fetching sensor logs:", error);
+      }
+    };
+
+    fetchLogs();
+  }, [sensorCount]);
+
+  const renderAlarm = (title, key) => {
+    const handleActivate = async () => {
+      try {
+        const response = await axios.post(
+          "https://security-app-backend.vercel.app/sensorTrigger",
+          { status: "motion" },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (response.data.success) {
+          setSensorCount((prev) => prev + 1); // Increment sensor count
+        }
+      } catch (error) {
+        console.error("Error triggering alarm:", error);
+        Alert.alert("Error", "Could not trigger the alarm.");
+      }
+    };
+
+    const handleDeactivate = () => {
+      Alert.alert("Info", "Alarm deactivation logic not implemented yet.");
+    };
+
+    return (
+      <View
+        style={[
+          styles.gridItem,
+          { width: isSmallScreen ? "100%" : "48%", gap: 10 },
+        ]}
+        key={key}
+      >
+        <Text style={styles.headingImage}>{title}</Text>
+        <View style={{ flexDirection: "row", gap: 20 }}>
+          <TouchableOpacity style={styles.button} onPress={handleActivate}>
+            <Text style={styles.buttonText}>Activate</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleDeactivate}>
+            <Text style={styles.buttonText}>Deactivate</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
-  const renderCamera = (title, subtitle, imageSrc, key) => (
+  const renderCamera = (title, key) => (
     <View
-      style={[styles.gridItem, { width: isSmallScreen ? "100%" : "48%" }]}
+      style={[
+        styles.gridItem,
+        { width: isSmallScreen ? "100%" : "48%", gap: 10 },
+      ]}
       key={key}
     >
-      <Image source={imageSrc} style={styles.image} />
       <Text style={styles.headingImage}>{title}</Text>
-      <Text style={styles.subHeadingImage}>{subtitle}</Text>
       <View style={styles.CameraBTNContainer}>
         <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("liveFeed", {
-              cameraTitle: title,
-            })
-          }
+          onPress={() => setShowLive((prev) => !prev)}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>Live Feed</Text>
+          <Text style={styles.buttonText}>
+            {showLive ? "Hide Feed" : "Live Feed"}
+          </Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.VideoCamButton}>
-          <Image
-            source={require("../assets/video-cameraIcon.png")}
-            style={styles.VideoCameraIcon}
-          />
-        </TouchableOpacity> */}
       </View>
+
+      {showLive && (
+        <View style={styles.videoContainer}>
+          <Text style={styles.cameraTitle}>{currentCamera.name}</Text>
+          <View style={styles.videoPlaceholder}>
+            <WebView style={styles.video} source={{ uri: currentCamera.uri }} />
+          </View>
+        </View>
+      )}
     </View>
   );
 
   return (
     <ScrollView style={{ marginBottom: 50 }}>
-      <View style={styles.mainBodyContainer}>
-        <View style={styles.headingContainer}>
-          <Image
-            source={require("../assets/shield.png")}
-            style={styles.bulbImage}
-          />
-          <Text style={styles.heading}>Security</Text>
+      <View style={styles.mainBodyOutter}>
+        <View style={[styles.mainBodyContainer, { marginTop: 70 }]}>
+          <View style={styles.headingContainer}>
+            <Text style={styles.heading}>Security</Text>
+          </View>
+
+          <View style={styles.gridContainer}>
+            {renderAlarm("Alarm", "frontDoorLock")}
+          </View>
+
+          {/* Display sensor count */}
+          <View style={styles.sensorCountContainer}>
+            <Text style={styles.sensorCountText}>
+              Sensor Triggered: {sensorCount} time{sensorCount === 1 ? "" : "s"}
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.gridContainer}>
-          {renderAlarm(
-            "Front Door Lock",
-            "August Smart Lock Pro",
-            require("../assets/frontDoorLock.jpg"),
-            "FrontDoorLock"
-          )}
-          {renderAlarm(
-            "Alarm System",
-            "SimpliSafe Home Security",
-            require("../assets/alarmSystem.jpg"),
-            "kitchen"
-          )}
-          {renderAlarm(
-            "Bedroom",
-            "Nanoleaf Essentials",
-            require("../assets/garageDoorSensor.jpg"),
-            "bedroom"
-          )}
-        </View>
-      </View>
-
-      <View style={styles.mainBodyContainer}>
-        <View style={styles.headingContainer}>
-          <Image
-            source={require("../assets/video-camera.png")}
-            style={styles.TempImage}
-          />
-          <Text style={styles.heading}>Cameras</Text>
-        </View>
-        <View style={styles.gridContainer}>
-          {renderCamera(
-            "Front Porch",
-            "Arlo Pro 4",
-            require("../assets/frontPorch.jpg"),
-            "living"
-          )}
-          {renderCamera(
-            "Backyard",
-            "Nest Cam IQ Outdoor",
-            require("../assets/backyardCam.jpg"),
-            "bedroom"
-          )}
-          {renderCamera(
-            "Garage",
-            "Ring Indoor Cam",
-            require("../assets/garageCam.jpg"),
-            "office"
-          )}
+        <View style={[styles.mainBodyContainer]}>
+          <View style={styles.headingContainer}>
+            <Text style={styles.heading}>Cameras</Text>
+          </View>
+          <View style={styles.gridContainer}>
+            {renderCamera("Camera", "living")}
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -136,10 +155,15 @@ export default function MainBody() {
 }
 
 const styles = StyleSheet.create({
+  mainBodyOutter: {
+    width: "100%",
+    paddingTop: 30,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
+  },
   mainBodyContainer: {
     width: "100%",
     padding: 20,
-    marginTop: 70,
     justifyContent: "flex-start",
     zIndex: 0,
   },
@@ -153,10 +177,6 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: "600",
-  },
-  bulbImage: {
-    width: 30,
-    height: 30,
   },
   gridContainer: {
     flexDirection: "row",
@@ -179,57 +199,66 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headingImage: {
-    fontSize: 16,
-    fontWeight: "400",
-  },
-  subHeadingImage: {
-    fontSize: 12,
-    fontWeight: "300",
-    color: "#6B7280",
-    paddingBottom: 30,
-  },
-  image: {
-    width: 150,
-    height: 150,
-    resizeMode: "cover",
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  TempImage: {
-    width: 35,
-    height: 40,
+    fontSize: 24,
+    fontWeight: "500",
   },
   CameraBTNContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
   },
   button: {
+    gap: 20,
     width: 100,
     height: 40,
     backgroundColor: "#4338CA",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
+    marginHorizontal: 10,
+    marginTop: 10,
   },
   buttonText: {
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "600",
   },
-  //   VideoCamButton: {
-  //     width: 70,
-  //     height: 40,
-  //     backgroundColor: "#BDC1C9",
-  //     borderRadius: 10,
-  //     padding: 20,
-  //     justifyContent: "center",
-  //     alignItems: "center",
-  //   },
-  //   VideoCameraIcon: {
-  //     width: 40,
-  //     height: 40,
-  //     padding: 20,
-  //   },
+  videoContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+    width: "100%",
+  },
+  cameraTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10,
+    color: "#4B5563",
+  },
+  videoPlaceholder: {
+    width: "100%",
+    height: Dimensions.get("window").height * 0.25,
+    backgroundColor: "#D1D5DB",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
+  // New styles for sensor count
+  sensorCountContainer: {
+    marginTop: 10,
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#E5E7EB",
+    borderRadius: 10,
+  },
+  sensorCountText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
 });
