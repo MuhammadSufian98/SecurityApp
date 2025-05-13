@@ -14,8 +14,8 @@ import axios from "axios";
 export default function MainBody() {
   const video = useRef(null);
   const [showLive, setShowLive] = useState(false);
-  const [sensorCount, setSensorCount] = useState(0); // Track sensor triggers
-  const [logs, setLogs] = useState([]); // Store the sensor logs
+  const [sensorCount, setSensorCount] = useState(0);
+  const [logs, setLogs] = useState([]);
 
   const cameraFeeds = [
     {
