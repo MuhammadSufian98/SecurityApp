@@ -124,6 +124,23 @@ export default function MainBody() {
   return (
     <ScrollView style={{ marginBottom: 50 }}>
       <View style={styles.mainBodyOutter}>
+        <View style={[styles.topRightButtonContainer, { marginTop: 70 }]}>
+          <TouchableOpacity
+            style={styles.topRightButton}
+            onPress={() => {
+              if (sensorCount === 0) {
+                Alert.alert("No Sensor Triggered Yet.");
+              } else {
+                Alert.alert(
+                  "Sensor Triggered",
+                  "Sensor Triggered.\n".repeat(sensorCount).trim()
+                );
+              }
+            }}
+          >
+            <Text style={styles.topRightButtonText}>Show Logs</Text>
+          </TouchableOpacity>
+        </View>
         <View style={[styles.mainBodyContainer, { marginTop: 70 }]}>
           <View style={styles.headingContainer}>
             <Text style={styles.heading}>Security</Text>
@@ -133,7 +150,6 @@ export default function MainBody() {
             {renderAlarm("Alarm", "frontDoorLock")}
           </View>
 
-          {/* Display sensor count */}
           <View style={styles.sensorCountContainer}>
             <Text style={styles.sensorCountText}>
               Sensor Triggered: {sensorCount} time{sensorCount === 1 ? "" : "s"}
@@ -160,6 +176,26 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     backgroundColor: "#F5F5F5",
     alignItems: "center",
+  },
+  topRightButtonContainer: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 10,
+  },
+
+  topRightButton: {
+    backgroundColor: "#EF4444",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    elevation: 4,
+  },
+
+  topRightButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 12,
   },
   mainBodyContainer: {
     width: "100%",
