@@ -29,19 +29,19 @@ export default function MainBody() {
   const isSmallScreen = screenWidth <= 650;
 
   // Fetch sensor logs from the backend
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const response = await axios.get(
-          "https://security-app-backend.vercel.app/sensorLog"
-        );
-        setLogs(response.data);
-        setSensorCount(response.data.length); // Update sensor count
-      } catch (error) {
-        console.error("Error fetching sensor logs:", error);
-      }
-    };
+  const fetchLogs = async () => {
+    try {
+      const response = await axios.get(
+        "https://security-app-backend.vercel.app/sensorLog"
+      );
+      setLogs(response.data);
+      setSensorCount(response.data.length);
+    } catch (error) {
+      console.error("Error fetching sensor logs:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchLogs();
   }, [sensorCount]);
 
@@ -49,7 +49,7 @@ export default function MainBody() {
     const sendAlarmStatus = async (status) => {
       try {
         const response = await axios.post(
-          "https://security-app-backend.vercel.app/alarmStatus",
+          "https://security-app-backend.vercel.app/alarmTrigger",
           { status },
           {
             headers: { "Content-Type": "application/json" },
@@ -129,7 +129,12 @@ export default function MainBody() {
   return (
     <ScrollView style={{ marginBottom: 50 }}>
       <View style={styles.mainBodyOutter}>
-        <View style={[styles.topRightButtonContainer, { marginTop: 70 }]}>
+        <View
+          style={[
+            styles.topRightButtonContainer,
+            { flexDirection: "row", gap: 10, marginTop: 70 },
+          ]}
+        >
           <TouchableOpacity
             style={styles.topRightButton}
             onPress={() => {
@@ -144,6 +149,13 @@ export default function MainBody() {
             }}
           >
             <Text style={styles.topRightButtonText}>Show Logs</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.topRightButton, { backgroundColor: "#10B981" }]}
+            onPress={fetchLogs}
+          >
+            <Text style={styles.topRightButtonText}>Reload</Text>
           </TouchableOpacity>
         </View>
         <View style={[styles.mainBodyContainer, { marginTop: 70 }]}>
@@ -174,6 +186,8 @@ export default function MainBody() {
     </ScrollView>
   );
 }
+
+// Styles remain unchanged
 
 const styles = StyleSheet.create({
   mainBodyOutter: {
