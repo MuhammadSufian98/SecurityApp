@@ -46,27 +46,26 @@ export default function MainBody() {
   }, [sensorCount]);
 
   const renderAlarm = (title, key) => {
-    const handleActivate = async () => {
+    const sendAlarmStatus = async (status) => {
       try {
         const response = await axios.post(
-          "https://security-app-backend.vercel.app/sensorTrigger",
-          { status: "motion" },
+          "https://security-app-backend.vercel.app/alarmStatus",
+          { status },
           {
             headers: { "Content-Type": "application/json" },
           }
         );
 
         if (response.data.success) {
-          setSensorCount((prev) => prev + 1); // Increment sensor count
+          Alert.alert(
+            "Success",
+            `Alarm ${status ? "Activated" : "Deactivated"}`
+          );
         }
       } catch (error) {
-        console.error("Error triggering alarm:", error);
-        Alert.alert("Error", "Could not trigger the alarm.");
+        console.error("Error updating alarm status:", error);
+        Alert.alert("Error", "Could not update alarm status.");
       }
-    };
-
-    const handleDeactivate = () => {
-      Alert.alert("Info", "Alarm deactivation logic not implemented yet.");
     };
 
     return (
@@ -79,10 +78,16 @@ export default function MainBody() {
       >
         <Text style={styles.headingImage}>{title}</Text>
         <View style={{ flexDirection: "row", gap: 20 }}>
-          <TouchableOpacity style={styles.button} onPress={handleActivate}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => sendAlarmStatus(true)}
+          >
             <Text style={styles.buttonText}>Activate</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleDeactivate}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => sendAlarmStatus(false)}
+          >
             <Text style={styles.buttonText}>Deactivate</Text>
           </TouchableOpacity>
         </View>
